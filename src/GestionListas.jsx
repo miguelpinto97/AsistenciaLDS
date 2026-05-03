@@ -27,6 +27,8 @@ const GestionListas = () => {
   const [appPath, setAppPath] = useState(window.location.pathname.replace(/^\/|\/$/g, ''));
   const [dbData, setDbData] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
+  const [showGeneralSummary, setShowGeneralSummary] = useState(false);
+  const [summaryFilter, setSummaryFilter] = useState('all'); // 'all' or className
   const [activeDbClass, setActiveDbClass] = useState(null);
   const [generatedLink, setGeneratedLink] = useState(null);
   const [currentClassInfo, setCurrentClassInfo] = useState(null); // { id, name, date }
@@ -481,44 +483,153 @@ const GestionListas = () => {
         ) : (
           /* Database View */
           <div className="space-y-8">
-            {/* Global Date Selector */}
-            <div className="flex justify-center">
-              <div className="inline-flex items-center gap-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-1.5 shadow-2xl">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+              <div className="flex items-center gap-4 bg-white/5 p-2 rounded-[2rem] border border-white/10">
                 <button 
-                  onClick={() => changeDate(-1)}
-                  className="p-2 hover:bg-white/10 rounded-xl transition-all text-text-muted hover:text-white"
+                  onClick={() => setShowGeneralSummary(false)}
+                  className={`px-6 py-2.5 rounded-[1.5rem] font-black transition-all text-sm ${!showGeneralSummary ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
                 >
-                  <ChevronLeft size={24} />
+                  Por Clases
                 </button>
-                <div className="flex items-center gap-3 px-6 py-2.5 bg-primary/20 rounded-xl text-primary border border-primary/30 min-w-[160px] justify-center">
-                  <Calendar size={18} />
-                  <span className="text-xl font-black uppercase tracking-tighter">
-                    {formatDate(selectedDate)}
-                  </span>
-                </div>
                 <button 
-                  onClick={() => changeDate(1)}
-                  className="p-2 hover:bg-white/10 rounded-xl transition-all text-text-muted hover:text-white"
+                  onClick={() => setShowGeneralSummary(true)}
+                  className={`px-6 py-2.5 rounded-[1.5rem] font-black transition-all text-sm ${showGeneralSummary ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
                 >
-                  <ChevronRight size={24} />
+                  Resumen General
                 </button>
               </div>
 
-              <button 
-                onClick={toggleLock}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black transition-all border ${
-                  isLocked 
-                    ? 'bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500/20' 
-                    : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/20'
-                }`}
-              >
-                {isLocked ? <><X size={18} /> Asistencia Cerrada</> : <><CheckCircle size={18} /> Asistencia Abierta</>}
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-6">
+                {/* Global Date Selector */}
+                <div className="inline-flex items-center gap-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-1 shadow-xl">
+                  <button onClick={() => changeDate(-1)} className="p-2 hover:bg-white/10 rounded-xl transition-all text-text-muted">
+                    <ChevronLeft size={20} />
+                  </button>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-primary/20 rounded-xl text-primary border border-primary/30 min-w-[140px] justify-center">
+                    <span className="text-lg font-black uppercase tracking-tighter">{formatDate(selectedDate)}</span>
+                  </div>
+                  <button onClick={() => changeDate(1)} className="p-2 hover:bg-white/10 rounded-xl transition-all text-text-muted">
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+
+                <button 
+                  onClick={toggleLock}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black transition-all border ${
+                    isLocked ? 'bg-red-500/10 border-red-500/50 text-red-500' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500'
+                  }`}
+                >
+                  {isLocked ? <><X size={18} /> Cerrada</> : <><CheckCircle size={18} /> Abierta</>}
+                </button>
+              </div>
             </div>
 
             {loading ? (
               <div className="flex flex-col items-center py-20 gap-4"><div className="w-10 h-10 border-4 border-t-primary rounded-full animate-spin" /><p className="text-text-muted">Consultando registros...</p></div>
+            ) : dbData && showGeneralSummary ? (
+              /* General Summary View */
+              <div className="space-y-12">
+                {/* Global Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="glass-effect p-8 border-l-4 border-primary">
+                    <p className="text-xs font-black uppercase tracking-widest text-text-muted mb-2">Total Asistentes</p>
+                    <h4 className="text-5xl font-black">
+                      {Object.values(dbData).reduce((acc, c) => acc + c.students.filter(s => s.asistio).length, 0)}
+                    </h4>
+                  </div>
+                  <div className="glass-effect p-8 border-l-4 border-accent">
+                    <p className="text-xs font-black uppercase tracking-widest text-text-muted mb-2">Clases con Asistencia</p>
+                    <h4 className="text-5xl font-black">{Object.values(dbData).filter(c => c.students.some(s => s.asistio)).length}</h4>
+                  </div>
+                  <div className="glass-effect p-8 border-l-4 border-white/20">
+                    <p className="text-xs font-black uppercase tracking-widest text-text-muted mb-2">Fecha del Reporte</p>
+                    <h4 className="text-3xl font-black uppercase">{formatDate(selectedDate)}</h4>
+                  </div>
+                </div>
+
+                {/* Filter Cards */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-black uppercase tracking-widest text-text-muted flex items-center gap-2">
+                    <Filter size={18} /> Filtrar por Clase
+                  </h3>
+                  <div className="flex flex-wrap gap-4">
+                    <button 
+                      onClick={() => setSummaryFilter('all')}
+                      className={`px-6 py-3 rounded-2xl font-bold transition-all border ${summaryFilter === 'all' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white/5 border-white/10 text-text-muted hover:border-white/30'}`}
+                    >
+                      Todos
+                    </button>
+                    {Object.keys(dbData).sort().map(className => {
+                      const count = dbData[className].students.filter(s => s.asistio).length;
+                      if (count === 0) return null;
+                      return (
+                        <button 
+                          key={className}
+                          onClick={() => setSummaryFilter(className)}
+                          className={`px-6 py-3 rounded-2xl font-bold transition-all border flex items-center gap-3 ${summaryFilter === className ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white/5 border-white/10 text-text-muted hover:border-white/30'}`}
+                        >
+                          {className}
+                          <span className={`px-2 py-0.5 rounded-lg text-xs font-black ${summaryFilter === className ? 'bg-white/20' : 'bg-white/10'}`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Unified Attendance Table */}
+                <div className="glass-effect overflow-hidden">
+                  <div className="p-6 border-b border-white/10">
+                    <h3 className="text-2xl font-black">
+                      {summaryFilter === 'all' ? 'Lista Completa de Asistencia' : `Asistencia: ${summaryFilter}`}
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="text-left text-xs font-black uppercase text-text-muted border-b border-white/5">
+                          <th className="p-6">#</th>
+                          <th className="p-6">Nombre del Alumno</th>
+                          <th className="p-6">Clase</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {Object.entries(dbData)
+                          .filter(([name]) => summaryFilter === 'all' || name === summaryFilter)
+                          .flatMap(([className, data]) => 
+                            data.students.filter(s => s.asistio).map(s => ({ ...s, className }))
+                          )
+                          .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                          .map((student, i) => (
+                            <tr key={`${student.className}-${student.id}`} className="hover:bg-white/[0.02] transition-colors">
+                              <td className="p-6 text-text-muted font-medium">{i + 1}</td>
+                              <td className="p-6 font-bold text-lg">{student.nombre}</td>
+                              <td className="p-6">
+                                <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-black uppercase border border-primary/20">
+                                  {student.className}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        }
+                        {Object.entries(dbData)
+                          .filter(([name]) => summaryFilter === 'all' || name === summaryFilter)
+                          .flatMap(([_, data]) => data.students.filter(s => s.asistio)).length === 0 && (
+                            <tr>
+                              <td colSpan="3" className="p-20 text-center text-text-muted italic font-medium">
+                                No se encontraron registros de asistencia para esta selección.
+                              </td>
+                            </tr>
+                          )
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             ) : dbData ? (
+              /* Per-Class Cards View */
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.keys(dbData).map((className, i) => (
                   <motion.div 
