@@ -133,7 +133,7 @@ const Asistencia = ({ shortCode }) => {
                   initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                   key={student.id}
                   onClick={() => setConfirmAttendance(student)}
-                  className="w-full p-6 bg-white/5 border border-white/5 hover:border-emerald-500/50 rounded-3xl text-left font-bold text-xl flex items-center justify-between group transition-all"
+                  className="w-full p-6 bg-white/5 border border-white/5 hover:border-emerald-500/50 rounded-3xl text-left font-bold text-xl flex items-center justify-between group transition-all cursor-pointer"
                 >
                   {student.nombre}
                   <ChevronRight size={24} className="text-slate-600 group-hover:text-emerald-500 transition-colors" />
@@ -193,7 +193,7 @@ const Asistencia = ({ shortCode }) => {
                 <button 
                   disabled={markStatus.state === 'loading'}
                   onClick={() => markStudentAttendance(confirmAttendance)} 
-                  className="w-full py-5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-wait text-white rounded-2xl font-black text-xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+                  className="w-full py-5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-wait text-white rounded-2xl font-black text-xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
                 >
                   {markStatus.state === 'loading' ? (
                     <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />

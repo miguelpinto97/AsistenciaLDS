@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
-import { 
-  Upload, FileText, ChevronLeft, ChevronRight, 
-  CheckCircle, Search, Database, AlertCircle, 
+import {
+  Upload, FileText, ChevronLeft, ChevronRight,
+  CheckCircle, Search, Database, AlertCircle,
   X, Trash2, Filter, CloudUpload, Calendar, Link, Copy, ExternalLink, UserCheck,
   QrCode, Scissors, Download
 } from 'lucide-react';
@@ -48,7 +48,7 @@ const GestionListas = () => {
   const [confirmAttendance, setConfirmAttendance] = useState(null); // student object
   const [markStatus, setMarkStatus] = useState({ state: 'idle', message: '' });
   const [showAttendanceOnly, setShowAttendanceOnly] = useState(false);
-  
+
   const [selectedDate, setSelectedDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + (7 - d.getDay()) % 7);
@@ -89,10 +89,10 @@ const GestionListas = () => {
     try {
       const classInfo = dbData[className];
       const dateStr = selectedDate.toISOString().split('T')[0];
-      
+
       const response = await fetch(`/.netlify/functions/getOrCreateShortLink?claseId=${classInfo.id}&fecha=${dateStr}`);
       const result = await response.json();
-      
+
       if (response.ok && result.code) {
         const shortUrl = `${window.location.origin}/${result.code}`;
         setGeneratedLink(shortUrl);
@@ -130,9 +130,9 @@ const GestionListas = () => {
       const response = await fetch('/.netlify/functions/markAttendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          alumnoId: student.id, 
-          fecha: attendanceMode.date 
+        body: JSON.stringify({
+          alumnoId: student.id,
+          fecha: attendanceMode.date
         })
       });
       if (response.ok) {
@@ -173,17 +173,17 @@ const GestionListas = () => {
 
   const copyAttendanceList = () => {
     if (!dbData) return;
-    
+
     const attendees = Object.entries(dbData)
       .filter(([name]) => summaryFilter === 'all' || name === summaryFilter)
       .flatMap(([_, data]) => data.students.filter(s => s.asistio).map(s => s.nombre))
       .sort((a, b) => a.localeCompare(b.nombre));
-    
+
     if (attendees.length === 0) {
       showToast("No hay asistentes para copiar", "error");
       return;
     }
-    
+
     const text = attendees.join(' | ');
     navigator.clipboard.writeText(text);
     showToast(`¡${attendees.length} nombres copiados!`);
@@ -201,7 +201,7 @@ const GestionListas = () => {
 
       const contentType = response.headers.get("content-type");
       let result;
-      
+
       if (contentType && contentType.includes("application/json")) {
         result = await response.json();
       } else {
@@ -270,10 +270,10 @@ const GestionListas = () => {
             }
 
             if (currentClass && isGlobalExtracting && !isPageSuppressed) {
-              const isNoise = /^(?:P[áa]g|Fecha|Firma|ID|N[o0]|Total|Faltas|Tardanzas|Estudiante|Alumno|Nombre|Maestros|Asistentes|Oficiales|Ene|Feb|Mar|Abr|May|Jun|Jul|Ago|Sep|Oct|Nov|Dic|X|\.|_|\d{2}\/\d{2}\/\d{4})/i.test(text) || 
-                              text.toUpperCase().includes("ESTACA LIMA") ||
-                              text.toUpperCase().includes("LISTAS DE ASISTENCIA") ||
-                              text.length < 3 || /^\d+$/.test(text);
+              const isNoise = /^(?:P[áa]g|Fecha|Firma|ID|N[o0]|Total|Faltas|Tardanzas|Estudiante|Alumno|Nombre|Maestros|Asistentes|Oficiales|Ene|Feb|Mar|Abr|May|Jun|Jul|Ago|Sep|Oct|Nov|Dic|X|\.|_|\d{2}\/\d{2}\/\d{4})/i.test(text) ||
+                text.toUpperCase().includes("ESTACA LIMA") ||
+                text.toUpperCase().includes("LISTAS DE ASISTENCIA") ||
+                text.length < 3 || /^\d+$/.test(text);
 
               if (!isNoise) {
                 if (!hasSkippedNameOnThisPage) {
@@ -314,23 +314,23 @@ const GestionListas = () => {
     <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto">
       {/* Header */}
       <header className="mb-12 text-center">
-        <motion.h1 
+        <motion.h1
           className="text-4xl md:text-6xl font-black mb-4 title-gradient"
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         >
           Asistencia Escuela Dominical
         </motion.h1>
-        
+
         <div className="inline-flex p-1 bg-white/5 backdrop-blur-md rounded-full border border-white/10 mt-6">
-          <button 
+          <button
             onClick={() => setViewMode('upload')}
-            className={`px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-all ${viewMode === 'upload' ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
+            className={`px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-all cursor-pointer ${viewMode === 'upload' ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
           >
             <Upload size={18} /> Subir PDF
           </button>
-          <button 
+          <button
             onClick={() => setViewMode('database')}
-            className={`px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-all ${viewMode === 'database' ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
+            className={`px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-all cursor-pointer ${viewMode === 'database' ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
           >
             <Database size={18} /> Base de Datos
           </button>
@@ -342,7 +342,7 @@ const GestionListas = () => {
         {viewMode === 'upload' ? (
           <div className="space-y-8">
             {!data && !loading && (
-              <motion.div 
+              <motion.div
                 className="glass-effect p-12 text-center group cursor-pointer"
                 whileHover={{ scale: 1.01 }}
               >
@@ -371,19 +371,18 @@ const GestionListas = () => {
                 {/* Action Bar */}
                 <div className="flex flex-wrap items-center justify-between gap-4 glass-effect p-4 px-6 mb-8">
                   <div className="flex items-center gap-4">
-                    <button 
+                    <button
                       onClick={syncData}
                       disabled={syncStatus.state === 'loading'}
-                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all ${
-                        syncStatus.state === 'loading' ? 'bg-white/10 text-white/50 cursor-wait' : 'bg-primary hover:bg-primary-hover text-white'
-                      }`}
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all ${syncStatus.state === 'loading' ? 'bg-white/10 text-white/50 cursor-wait' : 'bg-primary hover:bg-primary-hover text-white'
+                        }`}
                     >
                       {syncStatus.state === 'loading' ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Database size={18} />}
                       {syncStatus.state === 'loading' ? 'Sincronizando...' : 'Sincronizar con BD'}
                     </button>
                     <AnimatePresence>
                       {syncStatus.message && (
-                        <motion.span 
+                        <motion.span
                           initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
                           className={`text-sm font-bold flex items-center gap-2 ${syncStatus.state === 'error' ? 'text-red-400' : 'text-accent'}`}
                         >
@@ -401,12 +400,11 @@ const GestionListas = () => {
                 {/* Tabs */}
                 <div className="flex flex-wrap gap-2 pb-4">
                   {Object.keys(data).map(name => (
-                    <button 
+                    <button
                       key={name}
                       onClick={() => setActiveTab(name)}
-                      className={`px-6 py-3 rounded-2xl whitespace-nowrap font-bold transition-all border ${
-                        activeTab === name ? 'bg-primary border-primary text-white shadow-lg' : 'bg-white/5 border-white/5 text-text-muted hover:bg-white/10'
-                      }`}
+                      className={`px-6 py-3 rounded-2xl whitespace-nowrap font-bold transition-all border ${activeTab === name ? 'bg-primary border-primary text-white shadow-lg' : 'bg-white/5 border-white/5 text-text-muted hover:bg-white/10'
+                        }`}
                     >
                       {name}
                     </button>
@@ -416,7 +414,7 @@ const GestionListas = () => {
                 {/* Class View */}
                 <AnimatePresence mode="wait">
                   {activeTab && (
-                    <motion.div 
+                    <motion.div
                       key={activeTab}
                       initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
                       className="glass-effect overflow-hidden"
@@ -436,9 +434,9 @@ const GestionListas = () => {
                           <button onClick={() => setShowDuplicates(true)} className="text-sm font-bold text-primary hover:underline">Duplicados</button>
                           <div className="flex items-center bg-white/5 rounded-full px-4 py-2 border border-white/10 focus-within:border-primary/50 transition-all">
                             <Search size={16} className="text-text-muted" />
-                            <input 
-                              type="text" placeholder="Filtrar..." 
-                              value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setCurrentPage(p => ({...p, [activeTab]: 0})); }}
+                            <input
+                              type="text" placeholder="Filtrar..."
+                              value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setCurrentPage(p => ({ ...p, [activeTab]: 0 })); }}
                               className="bg-transparent border-none outline-none pl-3 text-sm font-medium w-32 md:w-48"
                             />
                           </div>
@@ -475,15 +473,15 @@ const GestionListas = () => {
                         <div className="p-6 bg-white/[0.02] flex items-center justify-between border-t border-white/10">
                           <span className="text-sm text-text-muted">Página <b>{(currentPage[activeTab] || 0) + 1}</b> de <b>{Math.ceil(getFilteredData(activeTab).length / ITEMS_PER_PAGE)}</b></span>
                           <div className="flex gap-2">
-                            <button 
-                              onClick={() => setCurrentPage(p => ({...p, [activeTab]: Math.max(0, (p[activeTab] || 0) - 1)}))}
+                            <button
+                              onClick={() => setCurrentPage(p => ({ ...p, [activeTab]: Math.max(0, (p[activeTab] || 0) - 1) }))}
                               disabled={(currentPage[activeTab] || 0) === 0}
                               className="p-2 hover:bg-white/10 disabled:opacity-30 rounded-lg transition-colors"
                             >
                               <ChevronLeft size={20} />
                             </button>
-                            <button 
-                              onClick={() => setCurrentPage(p => ({...p, [activeTab]: (p[activeTab] || 0) + 1}))}
+                            <button
+                              onClick={() => setCurrentPage(p => ({ ...p, [activeTab]: (p[activeTab] || 0) + 1 }))}
                               disabled={(currentPage[activeTab] || 0) >= Math.ceil(getFilteredData(activeTab).length / ITEMS_PER_PAGE) - 1}
                               className="p-2 hover:bg-white/10 disabled:opacity-30 rounded-lg transition-colors"
                             >
@@ -503,15 +501,15 @@ const GestionListas = () => {
           <div className="space-y-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
               <div className="flex items-center gap-4 bg-white/5 p-2 rounded-[2rem] border border-white/10">
-                <button 
+                <button
                   onClick={() => setShowGeneralSummary(false)}
-                  className={`px-6 py-2.5 rounded-[1.5rem] font-black transition-all text-sm ${!showGeneralSummary ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
+                  className={`px-6 py-2.5 rounded-[1.5rem] font-black transition-all text-sm cursor-pointer ${!showGeneralSummary ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
                 >
                   Por Clases
                 </button>
-                <button 
+                <button
                   onClick={() => setShowGeneralSummary(true)}
-                  className={`px-6 py-2.5 rounded-[1.5rem] font-black transition-all text-sm ${showGeneralSummary ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
+                  className={`px-6 py-2.5 rounded-[1.5rem] font-black transition-all text-sm cursor-pointer ${showGeneralSummary ? 'bg-primary text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
                 >
                   Resumen General
                 </button>
@@ -520,22 +518,21 @@ const GestionListas = () => {
               <div className="flex flex-wrap items-center justify-center gap-6">
                 {/* Global Date Selector */}
                 <div className="inline-flex items-center gap-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-1 shadow-xl">
-                  <button onClick={() => changeDate(-1)} className="p-2 hover:bg-white/10 rounded-xl transition-all text-text-muted">
+                  <button onClick={() => changeDate(-1)} className="p-2 hover:bg-white/10 rounded-xl transition-all text-text-muted cursor-pointer">
                     <ChevronLeft size={20} />
                   </button>
                   <div className="flex items-center gap-2 px-4 py-2 bg-primary/20 rounded-xl text-primary border border-primary/30 min-w-[140px] justify-center">
                     <span className="text-lg font-black uppercase tracking-tighter">{formatDate(selectedDate)}</span>
                   </div>
-                  <button onClick={() => changeDate(1)} className="p-2 hover:bg-white/10 rounded-xl transition-all text-text-muted">
+                  <button onClick={() => changeDate(1)} className="p-2 hover:bg-white/10 rounded-xl transition-all text-text-muted cursor-pointer">
                     <ChevronRight size={20} />
                   </button>
                 </div>
 
-                <button 
+                <button
                   onClick={toggleLock}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black transition-all border ${
-                    isLocked ? 'bg-red-500/10 border-red-500/50 text-red-500' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500'
-                  }`}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black transition-all border cursor-pointer ${isLocked ? 'bg-red-500/10 border-red-500/50 text-red-500' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500'
+                    }`}
                 >
                   {isLocked ? <><X size={18} /> Cerrada</> : <><CheckCircle size={18} /> Abierta</>}
                 </button>
@@ -571,9 +568,9 @@ const GestionListas = () => {
                     <Filter size={18} /> Filtrar por Clase
                   </h3>
                   <div className="flex flex-wrap gap-4">
-                    <button 
+                    <button
                       onClick={() => setSummaryFilter('all')}
-                      className={`px-6 py-3 rounded-2xl font-bold transition-all border ${summaryFilter === 'all' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white/5 border-white/10 text-text-muted hover:border-white/30'}`}
+                      className={`px-6 py-3 rounded-2xl font-bold transition-all border cursor-pointer ${summaryFilter === 'all' ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white/5 border-white/10 text-text-muted hover:border-white/30'}`}
                     >
                       Todos
                     </button>
@@ -581,10 +578,10 @@ const GestionListas = () => {
                       const count = dbData[className].students.filter(s => s.asistio).length;
                       if (count === 0) return null;
                       return (
-                        <button 
+                        <button
                           key={className}
                           onClick={() => setSummaryFilter(className)}
-                          className={`px-6 py-3 rounded-2xl font-bold transition-all border flex items-center gap-3 ${summaryFilter === className ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white/5 border-white/10 text-text-muted hover:border-white/30'}`}
+                          className={`px-6 py-3 rounded-2xl font-bold transition-all border flex items-center gap-3 cursor-pointer ${summaryFilter === className ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'bg-white/5 border-white/10 text-text-muted hover:border-white/30'}`}
                         >
                           {className}
                           <span className={`px-2 py-0.5 rounded-lg text-xs font-black ${summaryFilter === className ? 'bg-white/20' : 'bg-white/10'}`}>
@@ -602,11 +599,11 @@ const GestionListas = () => {
                     <h3 className="text-2xl font-black">
                       {summaryFilter === 'all' ? 'Lista Completa de Asistencia' : `Asistencia: ${summaryFilter}`}
                     </h3>
-                    <button 
+                    <button
                       onClick={copyAttendanceList}
-                      className="px-6 py-2 bg-accent text-slate-900 rounded-xl font-black text-sm hover:scale-[1.02] transition-all flex items-center gap-2 shadow-lg shadow-accent/20"
+                      className="px-6 py-2 bg-accent text-slate-900 rounded-xl font-black text-sm hover:scale-[1.02] transition-all flex items-center gap-2 shadow-lg shadow-accent/20 cursor-pointer"
                     >
-                      <Copy size={16} /> Copiar Lista (|)
+                      <Copy size={16} /> Copiar Lista
                     </button>
                   </div>
                   <div className="overflow-x-auto">
@@ -621,7 +618,7 @@ const GestionListas = () => {
                       <tbody className="divide-y divide-white/5">
                         {Object.entries(dbData)
                           .filter(([name]) => summaryFilter === 'all' || name === summaryFilter)
-                          .flatMap(([className, data]) => 
+                          .flatMap(([className, data]) =>
                             data.students.filter(s => s.asistio).map(s => ({ ...s, className }))
                           )
                           .sort((a, b) => a.nombre.localeCompare(b.nombre))
@@ -656,7 +653,7 @@ const GestionListas = () => {
               /* Per-Class Cards View */
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.keys(dbData).map((className, i) => (
-                  <motion.div 
+                  <motion.div
                     key={className}
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                     onClick={() => setActiveDbClass(className)}
@@ -668,19 +665,19 @@ const GestionListas = () => {
                     <h3 className="text-xl font-extrabold text-center">{className}</h3>
                     <p className="text-sm text-text-muted font-bold tracking-widest uppercase">{dbData[className].students.length} Alumnos</p>
                     <div className="flex flex-col gap-2 w-full mt-4">
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); setShowAttendanceOnly(false); setActiveDbClass(className); fetchDbData(); }}
                         className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-sm transition-all border border-white/5 flex items-center justify-center gap-2"
                       >
                         <Search size={14} /> Ver Lista
                       </button>
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); setShowAttendanceOnly(true); setActiveDbClass(className); fetchDbData(); }}
                         className="w-full py-2 bg-accent/10 hover:bg-accent/20 text-accent rounded-xl font-bold text-sm transition-all border border-accent/20 flex items-center justify-center gap-2"
                       >
                         <UserCheck size={14} /> Ver Asistencia
                       </button>
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); generateClassLink(className); }}
                         disabled={linkLoading}
                         className="w-full py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-bold text-sm transition-all border border-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
@@ -692,10 +689,10 @@ const GestionListas = () => {
                   </motion.div>
                 ))}
                 {Object.keys(dbData).length === 0 && (
-                   <div className="col-span-full py-20 text-center opacity-50 flex flex-col items-center gap-4">
-                     <Database size={64} />
-                     <p className="text-xl font-bold">Base de datos vacía</p>
-                   </div>
+                  <div className="col-span-full py-20 text-center opacity-50 flex flex-col items-center gap-4">
+                    <Database size={64} />
+                    <p className="text-xl font-bold">Base de datos vacía</p>
+                  </div>
                 )}
               </div>
             ) : null}
@@ -707,12 +704,12 @@ const GestionListas = () => {
       <AnimatePresence>
         {(showDuplicates || activeDbClass || generatedLink || confirmAttendance) && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-            <motion.div 
-               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-               onClick={() => { setShowDuplicates(false); setActiveDbClass(null); setGeneratedLink(null); setConfirmAttendance(null); }}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => { setShowDuplicates(false); setActiveDbClass(null); setGeneratedLink(null); setConfirmAttendance(null); }}
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative w-full max-w-2xl bg-slate-900 border border-white/20 rounded-3xl overflow-hidden shadow-2xl"
             >
@@ -726,27 +723,27 @@ const GestionListas = () => {
                       </div>
                       <h2 className="text-3xl font-black">Enlace de Asistencia</h2>
                     </div>
-                    <button 
+                    <button
                       onClick={() => setGeneratedLink(null)}
                       className="p-2 hover:bg-white/10 rounded-xl transition-colors"
                     >
                       <X size={24} />
                     </button>
                   </div>
-                  
+
                   <div className="flex flex-col md:flex-row gap-8 items-center">
                     {/* QR Code Section */}
                     <div className="flex flex-col items-center gap-4">
                       <div className="p-4 bg-white rounded-3xl shadow-xl">
-                        <QRCodeCanvas 
+                        <QRCodeCanvas
                           id="qr-canvas"
-                          value={generatedLink} 
+                          value={generatedLink}
                           size={180}
                           level="H"
                           includeMargin={true}
                         />
                       </div>
-                      <button 
+                      <button
                         onClick={copyQr}
                         className="flex items-center gap-2 text-primary font-bold hover:underline"
                       >
@@ -757,15 +754,15 @@ const GestionListas = () => {
                     {/* URL Section */}
                     <div className="flex-1 space-y-4 w-full">
                       <p className="text-text-muted font-medium">Comparte este enlace con los alumnos para que registren su asistencia:</p>
-                      
+
                       <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center gap-4">
-                        <input 
-                          readOnly value={generatedLink} 
+                        <input
+                          readOnly value={generatedLink}
                           className="bg-transparent border-none outline-none flex-1 text-sm font-mono opacity-60 overflow-hidden text-ellipsis"
                         />
-                        <button 
+                        <button
                           onClick={() => { navigator.clipboard.writeText(generatedLink); showToast("¡Enlace copiado!"); }}
-                  className="p-3 bg-primary text-white rounded-xl hover:bg-primary-hover transition-colors"
+                          className="p-3 bg-primary text-white rounded-xl hover:bg-primary-hover transition-colors"
                           title="Copiar Link"
                         >
                           <Copy size={18} />
@@ -773,7 +770,7 @@ const GestionListas = () => {
                       </div>
 
                       <div className="flex flex-wrap gap-3">
-                        <button 
+                        <button
                           onClick={() => window.open(generatedLink, '_blank')}
                           className="flex-1 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-xl font-bold flex items-center justify-center gap-2 transition-all border border-white/5"
                         >
@@ -784,7 +781,7 @@ const GestionListas = () => {
                   </div>
 
                   <div className="pt-4">
-                    <button 
+                    <button
                       onClick={() => setGeneratedLink(null)}
                       className="w-full py-4 bg-primary text-white rounded-2xl font-black text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
@@ -805,13 +802,13 @@ const GestionListas = () => {
                     <p className="text-xl text-text-muted">Hola <span className="text-white font-bold">{confirmAttendance.nombre}</span>, ¿deseas marcar tu asistencia para hoy?</p>
                   </div>
                   <div className="flex gap-4 pt-4">
-                    <button 
+                    <button
                       onClick={() => setConfirmAttendance(null)}
                       className="flex-1 py-5 bg-white/5 hover:bg-white/10 rounded-2xl font-black text-lg transition-all"
                     >
                       Cancelar
                     </button>
-                    <button 
+                    <button
                       onClick={() => markStudentAttendance(confirmAttendance)}
                       disabled={markStatus.state === 'loading'}
                       className="flex-1 py-5 bg-accent hover:bg-accent/80 text-slate-900 rounded-2xl font-black text-lg shadow-lg shadow-accent/20 transition-all flex items-center justify-center gap-2"
@@ -839,12 +836,12 @@ const GestionListas = () => {
                         <tr className="text-left text-xs font-black uppercase text-text-muted pb-4"><th className="pb-4">#</th><th className="pb-4">Nombre</th>{showDuplicates && <th className="pb-4 text-right">Cantidad</th>}</tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
-                        {((showDuplicates && data) ? findDuplicates(data[activeTab]) : 
-                          ((showAttendanceOnly && dbData && dbData[activeDbClass]) ? dbData[activeDbClass].students.filter(s => s.asistio) : 
-                          (dbData && dbData[activeDbClass] ? dbData[activeDbClass].students : []))
+                        {((showDuplicates && data) ? findDuplicates(data[activeTab]) :
+                          ((showAttendanceOnly && dbData && dbData[activeDbClass]) ? dbData[activeDbClass].students.filter(s => s.asistio) :
+                            (dbData && dbData[activeDbClass] ? dbData[activeDbClass].students : []))
                         ).map((item, i) => (
                           <tr key={i} className="text-lg">
-                            <td className="py-4 text-text-muted">{i+1}</td>
+                            <td className="py-4 text-text-muted">{i + 1}</td>
                             <td className="py-4 font-bold flex items-center gap-3">
                               {item.nombre}
                               {item.asistio && (
@@ -860,7 +857,7 @@ const GestionListas = () => {
                     </table>
                   </div>
                   <div className="p-6 border-t border-white/10 bg-white/[0.02] flex justify-end">
-                    <button 
+                    <button
                       onClick={() => { setShowDuplicates(false); setActiveDbClass(null); }}
                       className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black transition-colors"
                     >
@@ -876,7 +873,7 @@ const GestionListas = () => {
       {/* Toast Notification */}
       <AnimatePresence>
         {toast.show && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 50, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
             className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-6 py-4 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl"
           >
