@@ -94,7 +94,7 @@ const Asistencia = ({ shortCode }) => {
     );
   }
 
-  const students = dbData && attendanceMode ? dbData[attendanceMode.className]?.students : [];
+  const students = (dbData && attendanceMode && dbData[attendanceMode.className]) ? (dbData[attendanceMode.className].students || []) : [];
 
   return (
     <div className="min-h-screen bg-[#0a0c10] text-white p-4 md:p-8 overflow-y-auto">

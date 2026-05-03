@@ -284,9 +284,10 @@ const GestionListas = () => {
   };
 
   const findDuplicates = (names) => {
+    if (!names) return [];
     const counts = {};
     names.forEach(n => counts[n] = (counts[n] || 0) + 1);
-    return Object.entries(counts).filter(([_, c]) => c > 1).map(([n, c]) => ({ name: n, count: c }));
+    return Object.entries(counts).filter(([_, c]) => c > 1).map(([n, c]) => ({ nombre: n, count: c }));
   };
 
   return (
@@ -703,8 +704,9 @@ const GestionListas = () => {
                         <tr className="text-left text-xs font-black uppercase text-text-muted pb-4"><th className="pb-4">#</th><th className="pb-4">Nombre</th>{showDuplicates && <th className="pb-4 text-right">Cantidad</th>}</tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
-                        {(showDuplicates ? findDuplicates(data[activeTab]) : 
-                          (showAttendanceOnly ? dbData[activeDbClass].students.filter(s => s.asistio) : dbData[activeDbClass].students)
+                        {((showDuplicates && data) ? findDuplicates(data[activeTab]) : 
+                          ((showAttendanceOnly && dbData && dbData[activeDbClass]) ? dbData[activeDbClass].students.filter(s => s.asistio) : 
+                          (dbData && dbData[activeDbClass] ? dbData[activeDbClass].students : []))
                         ).map((item, i) => (
                           <tr key={i} className="text-lg">
                             <td className="py-4 text-text-muted">{i+1}</td>
