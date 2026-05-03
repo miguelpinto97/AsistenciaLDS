@@ -171,6 +171,24 @@ const GestionListas = () => {
     if (viewMode === 'database' || attendanceMode) fetchDbData();
   }, [viewMode, attendanceMode, selectedDate]);
 
+  const copyAttendanceList = () => {
+    if (!dbData) return;
+    
+    const attendees = Object.entries(dbData)
+      .filter(([name]) => summaryFilter === 'all' || name === summaryFilter)
+      .flatMap(([_, data]) => data.students.filter(s => s.asistio).map(s => s.nombre))
+      .sort((a, b) => a.localeCompare(b.nombre));
+    
+    if (attendees.length === 0) {
+      showToast("No hay asistentes para copiar", "error");
+      return;
+    }
+    
+    const text = attendees.join(' | ');
+    navigator.clipboard.writeText(text);
+    showToast(`¡${attendees.length} nombres copiados!`);
+  };
+
   const syncData = async () => {
     if (!data) return;
     setSyncStatus({ state: 'loading', message: 'Sincronizando...' });
@@ -580,10 +598,16 @@ const GestionListas = () => {
 
                 {/* Unified Attendance Table */}
                 <div className="glass-effect overflow-hidden">
-                  <div className="p-6 border-b border-white/10">
+                  <div className="p-6 border-b border-white/10 flex items-center justify-between flex-wrap gap-4">
                     <h3 className="text-2xl font-black">
                       {summaryFilter === 'all' ? 'Lista Completa de Asistencia' : `Asistencia: ${summaryFilter}`}
                     </h3>
+                    <button 
+                      onClick={copyAttendanceList}
+                      className="px-6 py-2 bg-accent text-slate-900 rounded-xl font-black text-sm hover:scale-[1.02] transition-all flex items-center gap-2 shadow-lg shadow-accent/20"
+                    >
+                      <Copy size={16} /> Copiar Lista (|)
+                    </button>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
