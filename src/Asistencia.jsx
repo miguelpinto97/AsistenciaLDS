@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronRight, AlertCircle, CheckCircle } from 'lucide-react';
+import { Search, ChevronRight, AlertCircle, CheckCircle, X } from 'lucide-react';
 
 const Asistencia = ({ shortCode }) => {
   const [attendanceMode, setAttendanceMode] = useState(null);
@@ -18,10 +18,11 @@ const Asistencia = ({ shortCode }) => {
         const response = await fetch(`/.netlify/functions/getShortLinkInfo?code=${shortCode}`);
         const result = await response.json();
         if (response.ok) {
-          setAttendanceMode({
-            classId: result.claseId,
-            className: result.className,
-            date: result.fecha.split('T')[0]
+          setAttendanceMode({ 
+            classId: result.claseId, 
+            className: result.className, 
+            date: result.fecha.split('T')[0],
+            isLocked: result.isLocked
           });
 
           // Also fetch students for this class
@@ -150,22 +151,26 @@ const Asistencia = ({ shortCode }) => {
 
       {/* Success/Error Overlay */}
       <AnimatePresence>
-        {markStatus.message && (
+        {(markStatus.message || (attendanceMode?.isLocked && !markStatus.message)) && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-xl" />
             <motion.div 
               initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 20 }}
               className={`relative p-12 rounded-[3rem] text-center space-y-6 max-w-sm w-full border-2 shadow-2xl ${
-                markStatus.state === 'error' ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500'
+                (markStatus.state === 'error' || attendanceMode?.isLocked) ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500'
               }`}
             >
               <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                markStatus.state === 'error' ? 'bg-red-500/20' : 'bg-emerald-500/20'
+                (markStatus.state === 'error' || attendanceMode?.isLocked) ? 'bg-red-500/20' : 'bg-emerald-500/20'
               }`}>
-                {markStatus.state === 'error' ? <AlertCircle size={60} /> : <CheckCircle size={60} />}
+                {attendanceMode?.isLocked && !markStatus.message ? <X size={60} /> : (markStatus.state === 'error' ? <AlertCircle size={60} /> : <CheckCircle size={60} />)}
               </div>
-              <h2 className="text-3xl font-black leading-tight">{markStatus.message}</h2>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Cerrando automáticamente...</p>
+              <h2 className="text-3xl font-black leading-tight">
+                {attendanceMode?.isLocked && !markStatus.message ? "Asistencia Cerrada" : markStatus.message}
+              </h2>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">
+                {attendanceMode?.isLocked && !markStatus.message ? "Ya no se permiten más registros para hoy." : "Cerrando automáticamente..."}
+              </p>
             </motion.div>
           </div>
         )}

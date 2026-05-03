@@ -26,6 +26,7 @@ const GestionListas = () => {
   const [viewMode, setViewMode] = useState('upload'); // 'upload' or 'database'
   const [appPath, setAppPath] = useState(window.location.pathname.replace(/^\/|\/$/g, ''));
   const [dbData, setDbData] = useState(null);
+  const [isLocked, setIsLocked] = useState(false);
   const [activeDbClass, setActiveDbClass] = useState(null);
   const [generatedLink, setGeneratedLink] = useState(null);
   const [currentClassInfo, setCurrentClassInfo] = useState(null); // { id, name, date }
@@ -66,6 +67,20 @@ const GestionListas = () => {
   useEffect(() => {
     if (viewMode === 'database') fetchDbData();
   }, [viewMode, selectedDate]);
+
+  const toggleLock = async () => {
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const newLockState = !isLocked;
+    try {
+      const response = await fetch(`/.netlify/functions/toggleAttendanceLock?fecha=${dateStr}&lock=${newLockState}`);
+      if (response.ok) {
+        setIsLocked(newLockState);
+        showToast(newLockState ? "Asistencia cerrada" : "Asistencia abierta");
+      }
+    } catch (error) {
+      showToast("Error al cambiar estado", "error");
+    }
+  };
 
   const generateClassLink = async (className) => {
     setLinkLoading(true);
@@ -138,7 +153,8 @@ const GestionListas = () => {
       const response = await fetch(`/.netlify/functions/getClases?date=${dateStr}`);
       const result = await response.json();
       if (response.ok) {
-        setDbData(result);
+        setDbData(result.classes);
+        setIsLocked(result.isLocked);
       } else {
         throw new Error(result.error);
       }
@@ -486,6 +502,17 @@ const GestionListas = () => {
                   <ChevronRight size={24} />
                 </button>
               </div>
+
+              <button 
+                onClick={toggleLock}
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black transition-all border ${
+                  isLocked 
+                    ? 'bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500/20' 
+                    : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/20'
+                }`}
+              >
+                {isLocked ? <><X size={18} /> Asistencia Cerrada</> : <><CheckCircle size={18} /> Asistencia Abierta</>}
+              </button>
             </div>
 
             {loading ? (

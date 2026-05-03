@@ -27,6 +27,16 @@ exports.handler = async (event, context) => {
   try {
     await client.connect();
     
+    // 0. Check if date is locked
+    const lockRes = await client.query('SELECT 1 FROM fechas_cerradas WHERE fecha = $1', [fecha]);
+    if (lockRes.rows.length > 0) {
+      return {
+        statusCode: 403,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: "Asistencia cerrada para esta fecha." })
+      };
+    }
+
     // Insert attendance with conflict handling (already marked)
     await client.query(`
       INSERT INTO asistencias (alumno_id, fecha)

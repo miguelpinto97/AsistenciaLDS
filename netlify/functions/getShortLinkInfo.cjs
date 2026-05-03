@@ -13,7 +13,8 @@ exports.handler = async (event) => {
   try {
     await client.connect();
     const res = await client.query(`
-      SELECT ec.fecha, c.nombre as clase, c.id as clase_id
+      SELECT ec.fecha, c.nombre as clase, c.id as clase_id,
+      EXISTS(SELECT 1 FROM fechas_cerradas fc WHERE fc.fecha = ec.fecha) as cerrada
       FROM enlaces_cortos ec
       JOIN clases c ON ec.clase_id = c.id
       WHERE ec.codigo = $1
@@ -33,7 +34,8 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         claseId: row.clase_id,
         className: row.clase,
-        fecha: row.fecha
+        fecha: row.fecha,
+        isLocked: row.cerrada
       })
     };
   } catch (error) {

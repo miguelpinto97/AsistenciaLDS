@@ -46,10 +46,15 @@ exports.handler = async (event, context) => {
       return acc;
     }, {});
 
+    // Check if date is locked
+    const dateStr = date || null;
+    const lockRes = await client.query('SELECT 1 FROM fechas_cerradas WHERE fecha = $1', [dateStr]);
+    const isLocked = lockRes.rows.length > 0;
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(grouped)
+      body: JSON.stringify({ classes: grouped, isLocked })
     };
 
   } catch (error) {
