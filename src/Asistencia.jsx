@@ -29,7 +29,7 @@ const Asistencia = ({ shortCode }) => {
           const dbResponse = await fetch(`/.netlify/functions/getClases?date=${result.fecha.split('T')[0]}`);
           const dbResult = await dbResponse.json();
           if (dbResponse.ok) {
-            setDbData(dbResult);
+            setDbData(dbResult.classes);
           }
         } else {
           setError("El enlace no es válido o ha expirado.");
