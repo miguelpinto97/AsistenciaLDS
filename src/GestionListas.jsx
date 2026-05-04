@@ -1218,11 +1218,11 @@ const GestionListas = () => {
                                   transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(0.9, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
                                 }}
                               >
-                                <div className="bg-white w-full flex justify-center">
+                                <div className="bg-white w-full flex-1 flex items-center justify-center min-h-0">
                                   <QRCodeCanvas 
                                     value={`${window.location.origin}/mark?c=${dbData[className]?.id}&d=${selectedDate.toISOString().split('T')[0]}`}
-                                    size={256}
-                                    style={{ width: '100%', height: 'auto', maxWidth: '100px' }}
+                                    size={512}
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                     level="M"
                                   />
                                 </div>
@@ -1302,11 +1302,11 @@ const GestionListas = () => {
                           transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(1, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
                         }}
                        >
-                         <div className="print-qr-wrapper w-full flex justify-center">
+                         <div className="print-qr-wrapper w-full flex-1 flex items-center justify-center min-h-0">
                            <QRCodeCanvas 
                               value={qrUrl}
-                              size={512}
-                              style={{ width: '100%', height: 'auto', maxWidth: '180px' }}
+                              size={1024}
+                              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                               level="H"
                               includeMargin={false}
                            />
