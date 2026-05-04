@@ -54,6 +54,7 @@ const GestionListas = () => {
     cols: 2,
     rows: 2,
     margin: 10,
+    qrPadding: 5,
     layout: 'vertical' // 'vertical' (portrait card) or 'horizontal' (landscape card)
   });
 
@@ -1081,6 +1082,21 @@ const GestionListas = () => {
                 </div>
 
                 <div className="space-y-4">
+                  <label className="text-sm font-black uppercase tracking-widest text-text-muted">Padding del QR (mm)</label>
+                  <input 
+                    type="range" min="0" max="20" step="1"
+                    value={qrSettings.qrPadding} 
+                    onChange={e => setQrSettings(s => ({...s, qrPadding: parseInt(e.target.value)}))}
+                    className="w-full accent-primary"
+                  />
+                  <div className="flex justify-between text-[10px] font-bold text-text-muted">
+                    <span>0mm</span>
+                    <span className="text-primary">{qrSettings.qrPadding}mm</span>
+                    <span>20mm</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
                   <label className="text-sm font-black uppercase tracking-widest text-text-muted">Orientación del QR</label>
                   <div className="flex gap-2">
                     <button 
@@ -1177,12 +1193,14 @@ const GestionListas = () => {
                           {pageClasses.map(className => (
                             <div 
                               key={className} 
-                              className={`border border-slate-200 rounded flex flex-col items-center justify-center p-1 gap-1 transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : ''}`}
+                              className={`border border-slate-200 rounded flex flex-col items-center justify-center transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : ''}`}
+                              style={{ padding: `${qrSettings.qrPadding * previewScale}px`, gap: `${2 * previewScale}px` }}
                             >
-                              <div className="bg-white">
+                              <div className="bg-white w-full flex justify-center">
                                 <QRCodeCanvas 
                                   value={`${window.location.origin}/mark?c=${dbData[className]?.id}&d=${selectedDate.toISOString().split('T')[0]}`}
-                                  size={90}
+                                  size={256}
+                                  style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
                                   level="M"
                                 />
                               </div>
@@ -1247,12 +1265,14 @@ const GestionListas = () => {
                    return (
                      <div 
                       key={className} 
-                      className={`border border-slate-300 rounded-[2mm] p-[2mm] flex flex-col items-center justify-center gap-[2mm] transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
+                      className={`border border-slate-300 rounded-[2mm] flex flex-col items-center justify-center transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
+                      style={{ padding: `${qrSettings.qrPadding}mm`, gap: '2mm' }}
                      >
-                       <div className="print-qr-wrapper">
+                       <div className="print-qr-wrapper w-full flex justify-center">
                          <QRCodeCanvas 
                             value={qrUrl}
-                            size={180}
+                            size={512}
+                            style={{ width: '100%', height: 'auto' }}
                             level="H"
                             includeMargin={false}
                          />
