@@ -1256,7 +1256,7 @@ const GestionListas = () => {
       </AnimatePresence>
 
       {/* Hidden Print Container */}
-      <div className="hidden print:block fixed inset-0 bg-white z-[9999]">
+      <div className="hidden print:block print-section">
         {/* We divide selected classes into chunks based on page capacity */}
         {(() => {
           const pageSize = qrSettings.cols * qrSettings.rows;
@@ -1266,9 +1266,8 @@ const GestionListas = () => {
           }
 
           return pages.map((pageClasses, pageIdx) => (
-            <div key={pageIdx} className="w-[210mm] h-[297mm] bg-white relative overflow-hidden" style={{ 
-              padding: `${qrSettings.margin}mm`,
-              pageBreakAfter: pageIdx === pages.length - 1 ? 'auto' : 'always' 
+            <div key={pageIdx} className="print-page w-[210mm] h-[297mm] bg-white relative overflow-hidden" style={{ 
+              padding: `${qrSettings.margin}mm`
             }}>
               <div 
                 className="grid gap-[2mm] w-full h-full"
@@ -1319,10 +1318,24 @@ const GestionListas = () => {
 
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body * { visibility: hidden; }
-          .print\\:block, .print\\:block * { visibility: visible; }
-          .print\\:block { position: absolute; left: 0; top: 0; width: 100%; height: auto !important; overflow: visible !important; }
           @page { size: A4 portrait; margin: 0; }
+          html, body { margin: 0; padding: 0; height: 100%; overflow: visible !important; }
+          body * { visibility: hidden; }
+          .print-section, .print-section * { visibility: visible; }
+          .print-section { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            background: white !important;
+          }
+          .print-page {
+            page-break-after: always;
+            page-break-inside: avoid;
+          }
+          .print-page:last-child {
+            page-break-after: auto;
+          }
         }
         .a4-preview {
           background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f1f5f9 75%), linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
