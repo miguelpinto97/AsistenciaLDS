@@ -1121,7 +1121,10 @@ const GestionListas = () => {
                   >
                     Cancelar
                   </button>
-                          {/* Preview Area */}
+                </div>
+              </div>
+
+              {/* Preview Area */}
               <div className="flex-1 bg-black/40 p-12 flex flex-col items-center overflow-y-auto custom-scrollbar">
                 <div className="mb-8 flex items-center justify-between w-full max-w-[500px]">
                   <div className="space-y-1">
