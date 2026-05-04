@@ -1215,7 +1215,7 @@ const GestionListas = () => {
                                   gap: `${2 * previewScale}px`,
                                   width: qrSettings.layout === 'horizontal' ? `${297 * previewScale}px` : '100%',
                                   height: qrSettings.layout === 'horizontal' ? `${210 * previewScale}px` : '100%',
-                                  transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(0.9, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
+                                  transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(0.95, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
                                 }}
                               >
                                 <div className="bg-white w-full flex-1 flex items-center justify-center min-h-0">
@@ -1297,7 +1297,7 @@ const GestionListas = () => {
                           gap: '2mm', 
                           width: qrSettings.layout === 'horizontal' ? '297mm' : '100%',
                           height: qrSettings.layout === 'horizontal' ? '210mm' : '100%',
-                          transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(1, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
+                          transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(0.95, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
                         }}
                        >
                          <div className="print-qr-wrapper w-full flex-1 flex items-center justify-center min-h-0">
