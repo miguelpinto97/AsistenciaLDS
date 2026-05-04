@@ -1188,7 +1188,7 @@ const GestionListas = () => {
           }
 
           return pages.map((pageClasses, pageIdx) => (
-            <div key={pageIdx} className="w-[210mm] h-[297mm] p-[15mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+            <div key={pageIdx} className="w-[210mm] h-[297mm] p-[15mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: pageIdx === pages.length - 1 ? 'auto' : 'always' }}>
               <div 
                 className="grid gap-[10mm] w-full h-full"
                 style={{ 
@@ -1236,7 +1236,7 @@ const GestionListas = () => {
         @media print {
           body * { visibility: hidden; }
           .print\\:block, .print\\:block * { visibility: visible; }
-          .print\\:block { position: absolute; left: 0; top: 0; width: 100%; }
+          .print\\:block { position: absolute; left: 0; top: 0; width: 100%; height: auto !important; overflow: visible !important; }
           @page { size: A4 portrait; margin: 0; }
         }
         .a4-preview {
