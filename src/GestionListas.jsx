@@ -55,6 +55,7 @@ const GestionListas = () => {
     rows: 2,
     margin: 10,
     qrPadding: 5,
+    fontSize: 12,
     layout: 'vertical' // 'vertical' (portrait card) or 'horizontal' (landscape card)
   });
 
@@ -1097,6 +1098,21 @@ const GestionListas = () => {
                 </div>
 
                 <div className="space-y-4">
+                  <label className="text-sm font-black uppercase tracking-widest text-text-muted">Tamaño de Texto (pt)</label>
+                  <input 
+                    type="range" min="6" max="32" step="1"
+                    value={qrSettings.fontSize} 
+                    onChange={e => setQrSettings(s => ({...s, fontSize: parseInt(e.target.value)}))}
+                    className="w-full accent-primary"
+                  />
+                  <div className="flex justify-between text-[10px] font-bold text-text-muted">
+                    <span>6pt</span>
+                    <span className="text-primary">{qrSettings.fontSize}pt</span>
+                    <span>32pt</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
                   <label className="text-sm font-black uppercase tracking-widest text-text-muted">Orientación del QR</label>
                   <div className="flex gap-2">
                     <button 
@@ -1204,9 +1220,13 @@ const GestionListas = () => {
                                   level="M"
                                 />
                               </div>
-                              <div className="min-w-0">
-                                <p className="text-[9px] font-black text-slate-900 uppercase leading-none truncate">{className}</p>
-                                <p className="text-[7px] font-bold text-slate-400 mt-1 uppercase">{formatDate(selectedDate)}</p>
+                              <div className="min-w-0 w-full">
+                                <p 
+                                  className="font-black text-slate-900 uppercase leading-none truncate"
+                                  style={{ fontSize: `${qrSettings.fontSize * (previewScale/3.78)}px` }} // approximate pt to px in preview
+                                >
+                                  {className}
+                                </p>
                               </div>
                             </div>
                           ))}
@@ -1277,9 +1297,13 @@ const GestionListas = () => {
                             includeMargin={false}
                          />
                        </div>
-                       <div className="space-y-[1mm]">
-                         <h4 className="text-[14pt] font-black text-black uppercase tracking-tighter leading-none">{className}</h4>
-                         <p className="text-[10pt] font-bold text-slate-500 uppercase">{formatDate(selectedDate)}</p>
+                       <div className="space-y-[1mm] w-full">
+                         <h4 
+                          className="font-black text-black uppercase tracking-tighter leading-none"
+                          style={{ fontSize: `${qrSettings.fontSize}pt` }}
+                         >
+                           {className}
+                         </h4>
                        </div>
                      </div>
                    );
