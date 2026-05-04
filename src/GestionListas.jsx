@@ -1202,15 +1202,15 @@ const GestionListas = () => {
                           className="grid gap-2 w-full h-full"
                           style={{ 
                             padding: `${qrSettings.margin * previewScale}px`,
-                            gridTemplateColumns: `repeat(${qrSettings.cols}, 1fr)`,
-                            gridTemplateRows: `repeat(${qrSettings.rows}, 1fr)`
+                            gridTemplateColumns: `repeat(${qrSettings.cols}, minmax(0, 1fr))`,
+                            gridTemplateRows: `repeat(${qrSettings.rows}, minmax(0, 1fr))`
                           }}
                         >
                           {pageClasses.map(className => (
                             <div 
                               key={className} 
-                              className={`border border-slate-200 rounded flex flex-col items-center justify-center transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : ''}`}
-                              style={{ padding: `${qrSettings.qrPadding * previewScale}px`, gap: `${2 * previewScale}px` }}
+                              className={`border border-slate-200 rounded flex flex-col items-center justify-center transition-all text-center overflow-hidden ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : ''}`}
+                              style={{ padding: `${qrSettings.qrPadding * previewScale}px`, gap: `${2 * previewScale}px`, maxHeight: '100%' }}
                             >
                               <div className="bg-white w-full flex justify-center">
                                 <QRCodeCanvas 
@@ -1272,8 +1272,8 @@ const GestionListas = () => {
               <div 
                 className="grid gap-[2mm] w-full h-full"
                 style={{ 
-                  gridTemplateColumns: `repeat(${qrSettings.cols}, 1fr)`,
-                  gridTemplateRows: `repeat(${qrSettings.rows}, 1fr)`
+                  gridTemplateColumns: `repeat(${qrSettings.cols}, minmax(0, 1fr))`,
+                  gridTemplateRows: `repeat(${qrSettings.rows}, minmax(0, 1fr))`
                 }}
               >
                 {pageClasses.map(className => {
@@ -1284,8 +1284,8 @@ const GestionListas = () => {
                    return (
                      <div 
                       key={className} 
-                      className={`border border-slate-300 rounded-[2mm] flex flex-col items-center justify-center transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
-                      style={{ padding: `${qrSettings.qrPadding}mm`, gap: '2mm' }}
+                      className={`border border-slate-300 rounded-[2mm] flex flex-col items-center justify-center transition-all text-center overflow-hidden ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
+                      style={{ padding: `${qrSettings.qrPadding}mm`, gap: '2mm', maxHeight: '100%', maxWidth: '100%' }}
                      >
                        <div className="print-qr-wrapper w-full flex justify-center">
                          <QRCodeCanvas 
