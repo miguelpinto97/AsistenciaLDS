@@ -48,6 +48,13 @@ const GestionListas = () => {
   const [confirmAttendance, setConfirmAttendance] = useState(null); // student object
   const [markStatus, setMarkStatus] = useState({ state: 'idle', message: '' });
   const [showAttendanceOnly, setShowAttendanceOnly] = useState(false);
+  const [showQRPrint, setShowQRPrint] = useState(false);
+  const [qrSettings, setQrSettings] = useState({
+    selectedClasses: [],
+    cols: 2,
+    rows: 2,
+    layout: 'vertical' // 'vertical' (portrait card) or 'horizontal' (landscape card)
+  });
 
   const [selectedDate, setSelectedDate] = useState(() => {
     const d = new Date();
@@ -288,6 +295,19 @@ const GestionListas = () => {
 
     navigator.clipboard.writeText(script);
     showToast("¡Script completo copiado!");
+  };
+
+  const togglePrintClass = (className) => {
+    setQrSettings(prev => ({
+      ...prev,
+      selectedClasses: prev.selectedClasses.includes(className)
+        ? prev.selectedClasses.filter(c => c !== className)
+        : [...prev.selectedClasses, className]
+    }));
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const syncData = async () => {
@@ -636,6 +656,12 @@ const GestionListas = () => {
                     }`}
                 >
                   {isLocked ? <><X size={18} /> Cerrada</> : <><CheckCircle size={18} /> Abierta</>}
+                </button>
+                <button 
+                  onClick={() => setShowQRPrint(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black transition-all border border-white/10 cursor-pointer"
+                >
+                  <QrCode size={18} /> Imprimir QRs
                 </button>
               </div>
             </div>
@@ -993,6 +1019,235 @@ const GestionListas = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* QR Print Modal */}
+      <AnimatePresence>
+        {showQRPrint && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+              onClick={() => setShowQRPrint(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-6xl bg-slate-900 border border-white/20 rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col md:flex-row h-[90vh]"
+            >
+              {/* Controls Sidebar */}
+              <div className="w-full md:w-80 border-r border-white/10 p-8 overflow-y-auto space-y-8 bg-white/[0.02]">
+                <div>
+                  <h3 className="text-xl font-black mb-6 flex items-center gap-2">
+                    <QrCode size={20} className="text-primary" /> Configurar QRs
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <label className="text-sm font-black uppercase tracking-widest text-text-muted">Distribución (Filas x Columnas)</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold text-text-muted">FILAS</span>
+                        <input 
+                          type="number" min="1" max="5" 
+                          value={qrSettings.rows} 
+                          onChange={e => setQrSettings(s => ({...s, rows: parseInt(e.target.value) || 1}))}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-center font-black"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold text-text-muted">COLUMNAS</span>
+                        <input 
+                          type="number" min="1" max="5" 
+                          value={qrSettings.cols} 
+                          onChange={e => setQrSettings(s => ({...s, cols: parseInt(e.target.value) || 1}))}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-center font-black"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-sm font-black uppercase tracking-widest text-text-muted">Orientación del QR</label>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setQrSettings(s => ({...s, layout: 'vertical'}))}
+                      className={`flex-1 py-2 rounded-xl text-xs font-black border transition-all ${qrSettings.layout === 'vertical' ? 'bg-primary border-primary text-white' : 'bg-white/5 border-white/10 text-text-muted'}`}
+                    >
+                      VERTICAL
+                    </button>
+                    <button 
+                      onClick={() => setQrSettings(s => ({...s, layout: 'horizontal'}))}
+                      className={`flex-1 py-2 rounded-xl text-xs font-black border transition-all ${qrSettings.layout === 'horizontal' ? 'bg-primary border-primary text-white' : 'bg-white/5 border-white/10 text-text-muted'}`}
+                    >
+                      HORIZONTAL
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-black uppercase tracking-widest text-text-muted">Seleccionar Clases</label>
+                    <button 
+                      onClick={() => setQrSettings(s => ({...s, selectedClasses: s.selectedClasses.length === Object.keys(dbData || {}).length ? [] : Object.keys(dbData || {})}))}
+                      className="text-[10px] font-black text-primary uppercase hover:underline"
+                    >
+                      {qrSettings.selectedClasses.length === Object.keys(dbData || {}).length ? 'Ninguna' : 'Todas'}
+                    </button>
+                  </div>
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    {Object.keys(dbData || {}).sort().map(className => (
+                      <label key={className} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                        <input 
+                          type="checkbox" 
+                          checked={qrSettings.selectedClasses.includes(className)}
+                          onChange={() => togglePrintClass(className)}
+                          className="w-4 h-4 rounded border-white/20 bg-transparent text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm font-bold truncate">{className}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 space-y-3">
+                  <button 
+                    onClick={handlePrint}
+                    disabled={qrSettings.selectedClasses.length === 0}
+                    className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-900 rounded-2xl font-black text-lg shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download size={20} /> Imprimir / PDF
+                  </button>
+                  <button 
+                    onClick={() => setShowQRPrint(false)}
+                    className="w-full py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-sm transition-all cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+
+              {/* Preview Area */}
+              <div className="flex-1 bg-black/40 p-8 flex flex-col items-center overflow-y-auto">
+                <div className="mb-6 flex items-center justify-between w-full max-w-[500px]">
+                  <h4 className="text-sm font-black uppercase tracking-widest text-text-muted">Vista Previa A4</h4>
+                  <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                    {qrSettings.selectedClasses.length} QRs seleccionados
+                  </span>
+                </div>
+                
+                {/* Simulated A4 Page */}
+                <div className="a4-preview bg-white shadow-2xl relative overflow-hidden flex flex-col" style={{ width: '500px', height: '707px' }}>
+                   <div 
+                    className="grid gap-4 p-8 w-full h-full"
+                    style={{ 
+                      gridTemplateColumns: `repeat(${qrSettings.cols}, 1fr)`,
+                      gridTemplateRows: `repeat(${qrSettings.rows}, 1fr)`
+                    }}
+                   >
+                     {qrSettings.selectedClasses.map((className, i) => (
+                       <div 
+                        key={className} 
+                        className={`border-2 border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center p-4 gap-2 ${qrSettings.layout === 'horizontal' ? 'flex-row' : 'flex-col'}`}
+                       >
+                         <div className="w-24 h-24 bg-slate-100 rounded-lg flex items-center justify-center text-slate-300">
+                           <QrCode size={40} />
+                         </div>
+                         <div className="text-center">
+                            <p className="text-[10px] font-black text-slate-900 uppercase leading-none">{className}</p>
+                            <p className="text-[8px] font-bold text-slate-400 mt-1">{formatDate(selectedDate)}</p>
+                         </div>
+                       </div>
+                     ))}
+                     {/* Empty slots placeholders */}
+                     {Array.from({ length: Math.max(0, (qrSettings.cols * qrSettings.rows) - qrSettings.selectedClasses.length) }).map((_, i) => (
+                       <div key={i} className="border-2 border-dashed border-slate-100 rounded-lg" />
+                     ))}
+                   </div>
+                   
+                   {/* Watermark/Pagination info for preview */}
+                   <div className="absolute bottom-4 right-4 text-[8px] font-black text-slate-200 uppercase tracking-widest">
+                     Asistencia Escuela Dominical
+                   </div>
+                </div>
+                
+                <p className="mt-6 text-sm text-text-muted font-medium max-w-md text-center">
+                  * La vista previa es una representación a escala. Los QRs se generarán con sus enlaces reales al imprimir.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Hidden Print Container */}
+      <div className="hidden print:block fixed inset-0 bg-white z-[9999]">
+        {/* We divide selected classes into chunks based on page capacity */}
+        {(() => {
+          const pageSize = qrSettings.cols * qrSettings.rows;
+          const pages = [];
+          for (let i = 0; i < qrSettings.selectedClasses.length; i += pageSize) {
+            pages.push(qrSettings.selectedClasses.slice(i, i + pageSize));
+          }
+
+          return pages.map((pageClasses, pageIdx) => (
+            <div key={pageIdx} className="w-[210mm] h-[297mm] p-[15mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+              <div 
+                className="grid gap-[10mm] w-full h-full"
+                style={{ 
+                  gridTemplateColumns: `repeat(${qrSettings.cols}, 1fr)`,
+                  gridTemplateRows: `repeat(${qrSettings.rows}, 1fr)`
+                }}
+              >
+                {pageClasses.map(className => {
+                   const classId = dbData[className]?.id;
+                   const dateStr = selectedDate.toISOString().split('T')[0];
+                   // Note: In a real environment, we'd need these pre-generated or use a dynamic URL that redirects.
+                   // For now, we use a link that works if the server is running.
+                   const qrUrl = `${window.location.origin}/mark?c=${classId}&d=${dateStr}`;
+                   
+                   return (
+                     <div 
+                      key={className} 
+                      className={`border border-slate-200 rounded-[5mm] p-[5mm] flex items-center justify-center gap-[4mm] ${qrSettings.layout === 'horizontal' ? 'flex-row' : 'flex-col text-center'}`}
+                     >
+                       <div className="print-qr-wrapper">
+                         <QRCodeCanvas 
+                            value={qrUrl}
+                            size={qrSettings.layout === 'horizontal' ? 120 : 180}
+                            level="H"
+                            includeMargin={false}
+                         />
+                       </div>
+                       <div className="space-y-[1mm]">
+                         <h4 className="text-[14pt] font-black text-black uppercase tracking-tighter leading-none">{className}</h4>
+                         <p className="text-[10pt] font-bold text-slate-500 uppercase">{formatDate(selectedDate)}</p>
+                       </div>
+                     </div>
+                   );
+                })}
+              </div>
+              <div className="absolute bottom-[5mm] left-1/2 -translate-x-1/2 text-[8pt] font-black text-slate-300 uppercase tracking-widest">
+                Asistencia Escuela Dominical • Página {pageIdx + 1}
+              </div>
+            </div>
+          ));
+        })()}
+      </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body * { visibility: hidden; }
+          .print\\:block, .print\\:block * { visibility: visible; }
+          .print\\:block { position: absolute; left: 0; top: 0; width: 100%; }
+          @page { size: A4 portrait; margin: 0; }
+        }
+        .a4-preview {
+          background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f1f5f9 75%), linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+          background-size: 20px 20px;
+          background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+      `}} />
     </div>
   );
 };
