@@ -1207,26 +1207,33 @@ const GestionListas = () => {
                           }}
                         >
                           {pageClasses.map(className => (
-                            <div 
-                              key={className} 
-                              className={`border border-slate-200 rounded flex flex-col items-center justify-center transition-all text-center overflow-hidden ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : ''}`}
-                              style={{ padding: `${qrSettings.qrPadding * previewScale}px`, gap: `${2 * previewScale}px`, maxHeight: '100%' }}
-                            >
-                              <div className="bg-white w-full flex justify-center">
-                                <QRCodeCanvas 
-                                  value={`${window.location.origin}/mark?c=${dbData[className]?.id}&d=${selectedDate.toISOString().split('T')[0]}`}
-                                  size={256}
-                                  style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
-                                  level="M"
-                                />
-                              </div>
-                              <div className="min-w-0 w-full">
-                                <p 
-                                  className="font-black text-slate-900 uppercase break-words"
-                                  style={{ fontSize: `${qrSettings.fontSize * (previewScale/3.78)}px` }} // approximate pt to px in preview
-                                >
-                                  {className}
-                                </p>
+                            <div key={className} className="relative w-full h-full flex items-center justify-center overflow-hidden">
+                              <div 
+                                className={`border border-slate-200 rounded flex flex-col items-center justify-center transition-all text-center bg-white ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
+                                style={{ 
+                                  padding: `${qrSettings.qrPadding * previewScale}px`, 
+                                  gap: `${2 * previewScale}px`,
+                                  width: qrSettings.layout === 'horizontal' ? `${297 * previewScale}px` : '100%',
+                                  height: qrSettings.layout === 'horizontal' ? `${210 * previewScale}px` : '100%',
+                                  transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(0.9, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
+                                }}
+                              >
+                                <div className="bg-white w-full flex justify-center">
+                                  <QRCodeCanvas 
+                                    value={`${window.location.origin}/mark?c=${dbData[className]?.id}&d=${selectedDate.toISOString().split('T')[0]}`}
+                                    size={256}
+                                    style={{ width: '100%', height: 'auto', maxWidth: '100px' }}
+                                    level="M"
+                                  />
+                                </div>
+                                <div className="min-w-0 w-full">
+                                  <p 
+                                    className="font-black text-slate-900 uppercase break-words"
+                                    style={{ fontSize: `${qrSettings.fontSize * (previewScale/3.78)}px` }} // approximate pt to px in preview
+                                  >
+                                    {className}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -1276,33 +1283,42 @@ const GestionListas = () => {
                   gridTemplateRows: `repeat(${qrSettings.rows}, minmax(0, 1fr))`
                 }}
               >
-                {pageClasses.map(className => {
+                 {pageClasses.map(className => {
                    const classId = dbData[className]?.id;
                    const dateStr = selectedDate.toISOString().split('T')[0];
                    const qrUrl = `${window.location.origin}/mark?c=${classId}&d=${dateStr}`;
                    
                    return (
-                     <div 
-                      key={className} 
-                      className={`border border-slate-300 rounded-[2mm] flex flex-col items-center justify-center transition-all text-center overflow-hidden ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
-                      style={{ padding: `${qrSettings.qrPadding}mm`, gap: '2mm', maxHeight: '100%', maxWidth: '100%' }}
-                     >
-                       <div className="print-qr-wrapper w-full flex justify-center">
-                         <QRCodeCanvas 
-                            value={qrUrl}
-                            size={512}
-                            style={{ width: '100%', height: 'auto' }}
-                            level="H"
-                            includeMargin={false}
-                         />
-                       </div>
-                       <div className="w-full">
-                         <h4 
-                          className="font-black text-black uppercase tracking-tighter break-words"
-                          style={{ fontSize: `${qrSettings.fontSize}pt` }}
-                         >
-                           {className}
-                         </h4>
+                     <div key={className} className="relative w-full h-full flex items-center justify-center overflow-hidden">
+                       <div 
+                        className={`border border-slate-300 rounded-[2mm] flex flex-col items-center justify-center transition-all text-center bg-white ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
+                        style={{ 
+                          padding: `${qrSettings.qrPadding}mm`, 
+                          gap: '2mm', 
+                          width: qrSettings.layout === 'horizontal' ? '297mm' : '100%',
+                          height: qrSettings.layout === 'horizontal' ? '210mm' : '100%',
+                          maxWidth: qrSettings.layout === 'horizontal' ? '120%' : '100%',
+                          maxHeight: qrSettings.layout === 'horizontal' ? '120%' : '100%',
+                          transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(1, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
+                        }}
+                       >
+                         <div className="print-qr-wrapper w-full flex justify-center">
+                           <QRCodeCanvas 
+                              value={qrUrl}
+                              size={512}
+                              style={{ width: '100%', height: 'auto', maxWidth: '180px' }}
+                              level="H"
+                              includeMargin={false}
+                           />
+                         </div>
+                         <div className="w-full">
+                           <h4 
+                            className="font-black text-black uppercase tracking-tighter break-words"
+                            style={{ fontSize: `${qrSettings.fontSize}pt` }}
+                           >
+                             {className}
+                           </h4>
+                         </div>
                        </div>
                      </div>
                    );
