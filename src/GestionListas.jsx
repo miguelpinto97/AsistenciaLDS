@@ -53,6 +53,7 @@ const GestionListas = () => {
     selectedClasses: [],
     cols: 2,
     rows: 2,
+    margin: 10,
     layout: 'vertical' // 'vertical' (portrait card) or 'horizontal' (landscape card)
   });
 
@@ -1065,6 +1066,21 @@ const GestionListas = () => {
                 </div>
 
                 <div className="space-y-4">
+                  <label className="text-sm font-black uppercase tracking-widest text-text-muted">Margen de Página (mm)</label>
+                  <input 
+                    type="range" min="0" max="30" step="1"
+                    value={qrSettings.margin} 
+                    onChange={e => setQrSettings(s => ({...s, margin: parseInt(e.target.value)}))}
+                    className="w-full accent-primary"
+                  />
+                  <div className="flex justify-between text-[10px] font-bold text-text-muted">
+                    <span>0mm</span>
+                    <span className="text-primary">{qrSettings.margin}mm</span>
+                    <span>30mm</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
                   <label className="text-sm font-black uppercase tracking-widest text-text-muted">Orientación del QR</label>
                   <div className="flex gap-2">
                     <button 
@@ -1146,11 +1162,14 @@ const GestionListas = () => {
                     }
                     if (pages.length === 0) pages.push([]);
 
+                    const previewScale = 450 / 210; // scale from mm to preview pixels
+
                     return pages.map((pageClasses, pageIdx) => (
                       <div key={pageIdx} className="bg-white shadow-[0_0_50px_rgba(0,0,0,0.3)] relative overflow-hidden flex flex-col flex-shrink-0" style={{ width: '450px', height: '636px' }}>
                         <div 
-                          className="grid gap-4 p-8 w-full h-full"
+                          className="grid gap-2 w-full h-full"
                           style={{ 
+                            padding: `${qrSettings.margin * previewScale}px`,
                             gridTemplateColumns: `repeat(${qrSettings.cols}, 1fr)`,
                             gridTemplateRows: `repeat(${qrSettings.rows}, 1fr)`
                           }}
@@ -1158,7 +1177,7 @@ const GestionListas = () => {
                           {pageClasses.map(className => (
                             <div 
                               key={className} 
-                              className={`border border-slate-200 rounded-lg flex flex-col items-center justify-center p-3 gap-2 transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : ''}`}
+                              className={`border border-slate-200 rounded flex flex-col items-center justify-center p-1 gap-1 transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : ''}`}
                             >
                               <div className="bg-white">
                                 <QRCodeCanvas 
@@ -1209,9 +1228,12 @@ const GestionListas = () => {
           }
 
           return pages.map((pageClasses, pageIdx) => (
-            <div key={pageIdx} className="w-[210mm] h-[297mm] p-[15mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: pageIdx === pages.length - 1 ? 'auto' : 'always' }}>
+            <div key={pageIdx} className="w-[210mm] h-[297mm] bg-white relative overflow-hidden" style={{ 
+              padding: `${qrSettings.margin}mm`,
+              pageBreakAfter: pageIdx === pages.length - 1 ? 'auto' : 'always' 
+            }}>
               <div 
-                className="grid gap-[10mm] w-full h-full"
+                className="grid gap-[2mm] w-full h-full"
                 style={{ 
                   gridTemplateColumns: `repeat(${qrSettings.cols}, 1fr)`,
                   gridTemplateRows: `repeat(${qrSettings.rows}, 1fr)`
@@ -1220,14 +1242,12 @@ const GestionListas = () => {
                 {pageClasses.map(className => {
                    const classId = dbData[className]?.id;
                    const dateStr = selectedDate.toISOString().split('T')[0];
-                   // Note: In a real environment, we'd need these pre-generated or use a dynamic URL that redirects.
-                   // For now, we use a link that works if the server is running.
                    const qrUrl = `${window.location.origin}/mark?c=${classId}&d=${dateStr}`;
                    
                    return (
                      <div 
                       key={className} 
-                      className={`border border-slate-200 rounded-[5mm] p-[5mm] flex flex-col items-center justify-center gap-[4mm] transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
+                      className={`border border-slate-300 rounded-[2mm] p-[2mm] flex flex-col items-center justify-center gap-[2mm] transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
                      >
                        <div className="print-qr-wrapper">
                          <QRCodeCanvas 
