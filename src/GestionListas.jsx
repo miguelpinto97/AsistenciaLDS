@@ -184,9 +184,110 @@ const GestionListas = () => {
       return;
     }
 
-    const text = attendees.join(' | ');
+    const text = attendees.join('|');
     navigator.clipboard.writeText(text);
     showToast(`¡${attendees.length} nombres copiados!`);
+  };
+
+  const formatDateForLCR = (date) => {
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    return `${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]}`;
+  };
+
+  const copyFullScript = () => {
+    if (!dbData) return;
+    
+    const attendees = Object.entries(dbData)
+      .filter(([name]) => summaryFilter === 'all' || name === summaryFilter)
+      .flatMap(([_, data]) => data.students.filter(s => s.asistio).map(s => s.nombre))
+      .sort((a, b) => a.localeCompare(b.nombre));
+    
+    if (attendees.length === 0) {
+      showToast("No hay asistentes para generar script", "error");
+      return;
+    }
+
+    const columna = formatDateForLCR(selectedDate);
+    const namesArray = JSON.stringify(attendees);
+
+    const script = `
+(function() {
+  const columnaBuscada = "${columna}";
+  const alumnos = ${namesArray};
+
+  async function marcar(columnaBuscada, alumnos) {
+    const esperar = ms => new Promise(r => setTimeout(r, ms));
+    const tabla = document.querySelector('table');
+    if (!tabla) return alert("No se encontró tabla de asistencia");
+
+    const headers = [...tabla.querySelectorAll('thead th')];
+    let indice = headers.findIndex(th => th.innerText.toLowerCase().includes(columnaBuscada.toLowerCase()));
+    
+    if (indice === -1) return alert("Columna '" + columnaBuscada + "' no encontrada");
+
+    let mios = [], existentes = [], noEncontrados = [];
+
+    for (const nombre of alumnos) {
+      const filas = [...tabla.querySelectorAll('tbody tr')];
+      let fila = filas.find(tr => tr.innerText.toLowerCase().includes(nombre.toLowerCase()));
+
+      if (!fila) { noEncontrados.push(nombre); continue; }
+
+      let boton = fila.querySelectorAll('td')[indice]?.querySelector('button');
+      if (!boton) { noEncontrados.push(nombre); continue; }
+
+      const path = boton.querySelector('svg path');
+      const d = path?.getAttribute('d') || '';
+      const esCheck = d.includes('l-') || d.includes('M'); // Ajuste según ícono de check
+
+      if (esCheck) {
+        existentes.push(nombre);
+      } else {
+        boton.click();
+        mios.push(nombre);
+        await esperar(600);
+      }
+    }
+    mostrarReporte(mios, existentes, noEncontrados);
+  }
+
+  function mostrarReporte(mios, existentes, noEncontrados) {
+    let div = document.createElement("div");
+    Object.assign(div.style, {
+      position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+      background: "#1e293b", color: "#f8fafc", padding: "30px", borderRadius: "20px",
+      zIndex: "10000", maxHeight: "80vh", overflow: "auto", minWidth: "400px",
+      boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)",
+      fontFamily: "sans-serif"
+    });
+
+    div.innerHTML = \`
+      <h3 style="margin-top:0; font-size:24px; font-weight:900; color:#10b981">Reporte de Asistencia</h3>
+      <p style="color:#94a3b8; font-weight:bold; font-size:12px; text-transform:uppercase; letter-spacing:1px">Columna: \${columnaBuscada}</p>
+      
+      <div style="margin: 20px 0">
+        <b style="color:#10b981">✅ Marcados ahora (\${mios.length}):</b>
+        <ul style="font-size:14px; opacity:0.8">\${mios.map(n => \`<li>\${n}</li>\`).join("")}</ul>
+        
+        <b style="color:#60a5fa">🔵 Ya estaban (\${existentes.length}):</b>
+        <ul style="font-size:14px; opacity:0.8">\${existentes.map(n => \`<li>\${n}</li>\`).join("")}</ul>
+        
+        <b style="color:#f87171">❌ No encontrados (\${noEncontrados.length}):</b>
+        <ul style="font-size:14px; opacity:0.8">\${noEncontrados.map(n => \`<li>\${n}</li>\`).join("")}</ul>
+      </div>
+      
+      <button id="closeRep" style="width:100%; padding:12px; background:#334155; border:none; color:white; border-radius:12px; font-weight:bold; cursor:pointer">Cerrar Reporte</button>
+    \`;
+    document.body.appendChild(div);
+    document.getElementById("closeRep").onclick = () => div.remove();
+  }
+
+  marcar(columnaBuscada, alumnos);
+})();
+    `.trim();
+
+    navigator.clipboard.writeText(script);
+    showToast("¡Script completo copiado!");
   };
 
   const syncData = async () => {
@@ -599,12 +700,20 @@ const GestionListas = () => {
                     <h3 className="text-2xl font-black">
                       {summaryFilter === 'all' ? 'Lista Completa de Asistencia' : `Asistencia: ${summaryFilter}`}
                     </h3>
-                    <button
-                      onClick={copyAttendanceList}
-                      className="px-6 py-2 bg-accent text-slate-900 rounded-xl font-black text-sm hover:scale-[1.02] transition-all flex items-center gap-2 shadow-lg shadow-accent/20 cursor-pointer"
-                    >
-                      <Copy size={16} /> Copiar Lista
-                    </button>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={copyAttendanceList}
+                        className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl font-black text-sm transition-all border border-white/10 flex items-center gap-2 cursor-pointer"
+                      >
+                        <Copy size={16} /> Copiar Nombres
+                      </button>
+                      <button 
+                        onClick={copyFullScript}
+                        className="px-6 py-2 bg-accent text-slate-900 rounded-xl font-black text-sm hover:scale-[1.02] transition-all flex items-center gap-2 shadow-lg shadow-accent/20 cursor-pointer"
+                      >
+                        <Scissors size={16} /> Copiar Script
+                      </button>
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
