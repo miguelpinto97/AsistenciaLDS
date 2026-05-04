@@ -1222,7 +1222,7 @@ const GestionListas = () => {
                               </div>
                               <div className="min-w-0 w-full">
                                 <p 
-                                  className="font-black text-slate-900 uppercase leading-none truncate"
+                                  className="font-black text-slate-900 uppercase break-words"
                                   style={{ fontSize: `${qrSettings.fontSize * (previewScale/3.78)}px` }} // approximate pt to px in preview
                                 >
                                   {className}
@@ -1297,9 +1297,9 @@ const GestionListas = () => {
                             includeMargin={false}
                          />
                        </div>
-                       <div className="space-y-[1mm] w-full">
+                       <div className="w-full">
                          <h4 
-                          className="font-black text-black uppercase tracking-tighter leading-none"
+                          className="font-black text-black uppercase tracking-tighter break-words"
                           style={{ fontSize: `${qrSettings.fontSize}pt` }}
                          >
                            {className}
