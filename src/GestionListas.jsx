@@ -1158,7 +1158,7 @@ const GestionListas = () => {
                           {pageClasses.map(className => (
                             <div 
                               key={className} 
-                              className={`border border-slate-200 rounded-lg flex items-center justify-center p-3 gap-2 ${qrSettings.layout === 'horizontal' ? 'flex-row' : 'flex-col text-center'}`}
+                              className={`border border-slate-200 rounded-lg flex items-center justify-center p-3 gap-2 transition-all ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : 'flex-col text-center'}`}
                             >
                               <div className="bg-white">
                                 <QRCodeCanvas 
@@ -1227,7 +1227,7 @@ const GestionListas = () => {
                    return (
                      <div 
                       key={className} 
-                      className={`border border-slate-200 rounded-[5mm] p-[5mm] flex items-center justify-center gap-[4mm] ${qrSettings.layout === 'horizontal' ? 'flex-row' : 'flex-col text-center'}`}
+                      className={`border border-slate-200 rounded-[5mm] p-[5mm] flex items-center justify-center gap-[4mm] transition-all ${qrSettings.layout === 'horizontal' ? 'rotate-90' : 'flex-col text-center'}`}
                      >
                        <div className="print-qr-wrapper">
                          <QRCodeCanvas 
