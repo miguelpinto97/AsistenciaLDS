@@ -1158,12 +1158,12 @@ const GestionListas = () => {
                           {pageClasses.map(className => (
                             <div 
                               key={className} 
-                              className={`border border-slate-200 rounded-lg flex items-center justify-center p-3 gap-2 transition-all ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : 'flex-col text-center'}`}
+                              className={`border border-slate-200 rounded-lg flex flex-col items-center justify-center p-3 gap-2 transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90 scale-90' : ''}`}
                             >
                               <div className="bg-white">
                                 <QRCodeCanvas 
                                   value={`${window.location.origin}/mark?c=${dbData[className]?.id}&d=${selectedDate.toISOString().split('T')[0]}`}
-                                  size={qrSettings.layout === 'horizontal' ? 60 : 90}
+                                  size={90}
                                   level="M"
                                 />
                               </div>
@@ -1227,12 +1227,12 @@ const GestionListas = () => {
                    return (
                      <div 
                       key={className} 
-                      className={`border border-slate-200 rounded-[5mm] p-[5mm] flex items-center justify-center gap-[4mm] transition-all ${qrSettings.layout === 'horizontal' ? 'rotate-90' : 'flex-col text-center'}`}
+                      className={`border border-slate-200 rounded-[5mm] p-[5mm] flex flex-col items-center justify-center gap-[4mm] transition-all text-center ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
                      >
                        <div className="print-qr-wrapper">
                          <QRCodeCanvas 
                             value={qrUrl}
-                            size={qrSettings.layout === 'horizontal' ? 120 : 180}
+                            size={180}
                             level="H"
                             includeMargin={false}
                          />
