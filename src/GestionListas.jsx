@@ -1209,7 +1209,7 @@ const GestionListas = () => {
                           {pageClasses.map(className => (
                             <div key={className} className="relative w-full h-full flex items-center justify-center overflow-hidden">
                               <div 
-                                className={`border border-slate-200 rounded flex flex-col items-center justify-center transition-all text-center bg-white ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
+                                className={`border border-slate-200 rounded flex flex-col items-center justify-center transition-all text-center bg-white`}
                                 style={{ 
                                   padding: `${qrSettings.qrPadding * previewScale}px`, 
                                   gap: `${2 * previewScale}px`,
@@ -1291,14 +1291,12 @@ const GestionListas = () => {
                    return (
                      <div key={className} className="relative w-full h-full flex items-center justify-center overflow-hidden">
                        <div 
-                        className={`border border-slate-300 rounded-[2mm] flex flex-col items-center justify-center transition-all text-center bg-white ${qrSettings.layout === 'horizontal' ? 'rotate-90' : ''}`}
+                        className={`border border-slate-300 rounded-[2mm] flex flex-col items-center justify-center transition-all text-center bg-white ${qrSettings.layout === 'horizontal' ? '' : ''}`}
                         style={{ 
                           padding: `${qrSettings.qrPadding}mm`, 
                           gap: '2mm', 
                           width: qrSettings.layout === 'horizontal' ? '297mm' : '100%',
                           height: qrSettings.layout === 'horizontal' ? '210mm' : '100%',
-                          maxWidth: qrSettings.layout === 'horizontal' ? '120%' : '100%',
-                          maxHeight: qrSettings.layout === 'horizontal' ? '120%' : '100%',
                           transform: qrSettings.layout === 'horizontal' ? `rotate(90deg) scale(${Math.min(1, (210/qrSettings.cols) / (297/qrSettings.rows))})` : 'none'
                         }}
                        >
