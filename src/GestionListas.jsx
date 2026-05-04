@@ -1121,55 +1121,73 @@ const GestionListas = () => {
                   >
                     Cancelar
                   </button>
-                </div>
-              </div>
-
-              {/* Preview Area */}
-              <div className="flex-1 bg-black/40 p-8 flex flex-col items-center overflow-y-auto">
-                <div className="mb-6 flex items-center justify-between w-full max-w-[500px]">
-                  <h4 className="text-sm font-black uppercase tracking-widest text-text-muted">Vista Previa A4</h4>
-                  <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
-                    {qrSettings.selectedClasses.length} QRs seleccionados
+                          {/* Preview Area */}
+              <div className="flex-1 bg-black/40 p-12 flex flex-col items-center overflow-y-auto custom-scrollbar">
+                <div className="mb-8 flex items-center justify-between w-full max-w-[500px]">
+                  <div className="space-y-1">
+                    <h4 className="text-xl font-black uppercase tracking-tight">Vista Previa Real</h4>
+                    <p className="text-xs font-bold text-text-muted uppercase tracking-widest">Formato A4 • {qrSettings.selectedClasses.length} QRs</p>
+                  </div>
+                  <span className="text-xs font-black text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
+                    {Math.ceil(qrSettings.selectedClasses.length / (qrSettings.cols * qrSettings.rows))} Página(s)
                   </span>
                 </div>
                 
-                {/* Simulated A4 Page */}
-                <div className="a4-preview bg-white shadow-2xl relative overflow-hidden flex flex-col" style={{ width: '500px', height: '707px' }}>
-                   <div 
-                    className="grid gap-4 p-8 w-full h-full"
-                    style={{ 
-                      gridTemplateColumns: `repeat(${qrSettings.cols}, 1fr)`,
-                      gridTemplateRows: `repeat(${qrSettings.rows}, 1fr)`
-                    }}
-                   >
-                     {qrSettings.selectedClasses.map((className, i) => (
-                       <div 
-                        key={className} 
-                        className={`border-2 border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center p-4 gap-2 ${qrSettings.layout === 'horizontal' ? 'flex-row' : 'flex-col'}`}
-                       >
-                         <div className="w-24 h-24 bg-slate-100 rounded-lg flex items-center justify-center text-slate-300">
-                           <QrCode size={40} />
-                         </div>
-                         <div className="text-center">
-                            <p className="text-[10px] font-black text-slate-900 uppercase leading-none">{className}</p>
-                            <p className="text-[8px] font-bold text-slate-400 mt-1">{formatDate(selectedDate)}</p>
-                         </div>
-                       </div>
-                     ))}
-                     {/* Empty slots placeholders */}
-                     {Array.from({ length: Math.max(0, (qrSettings.cols * qrSettings.rows) - qrSettings.selectedClasses.length) }).map((_, i) => (
-                       <div key={i} className="border-2 border-dashed border-slate-100 rounded-lg" />
-                     ))}
-                   </div>
-                   
-                   {/* Watermark/Pagination info for preview */}
-                   <div className="absolute bottom-4 right-4 text-[8px] font-black text-slate-200 uppercase tracking-widest">
-                     Asistencia Escuela Dominical
-                   </div>
+                {/* Multiple Simulated A4 Pages */}
+                <div className="space-y-12 pb-12">
+                  {(() => {
+                    const pageSize = qrSettings.cols * qrSettings.rows;
+                    const pages = [];
+                    for (let i = 0; i < qrSettings.selectedClasses.length; i += pageSize) {
+                      pages.push(qrSettings.selectedClasses.slice(i, i + pageSize));
+                    }
+                    if (pages.length === 0) pages.push([]);
+
+                    return pages.map((pageClasses, pageIdx) => (
+                      <div key={pageIdx} className="bg-white shadow-[0_0_50px_rgba(0,0,0,0.3)] relative overflow-hidden flex flex-col flex-shrink-0" style={{ width: '450px', height: '636px' }}>
+                        <div 
+                          className="grid gap-4 p-8 w-full h-full"
+                          style={{ 
+                            gridTemplateColumns: `repeat(${qrSettings.cols}, 1fr)`,
+                            gridTemplateRows: `repeat(${qrSettings.rows}, 1fr)`
+                          }}
+                        >
+                          {pageClasses.map(className => (
+                            <div 
+                              key={className} 
+                              className={`border border-slate-200 rounded-lg flex items-center justify-center p-3 gap-2 ${qrSettings.layout === 'horizontal' ? 'flex-row' : 'flex-col text-center'}`}
+                            >
+                              <div className="bg-white">
+                                <QRCodeCanvas 
+                                  value={`${window.location.origin}/mark?c=${dbData[className]?.id}&d=${selectedDate.toISOString().split('T')[0]}`}
+                                  size={qrSettings.layout === 'horizontal' ? 60 : 90}
+                                  level="M"
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[9px] font-black text-slate-900 uppercase leading-none truncate">{className}</p>
+                                <p className="text-[7px] font-bold text-slate-400 mt-1 uppercase">{formatDate(selectedDate)}</p>
+                              </div>
+                            </div>
+                          ))}
+                          {/* Fill empty slots with placeholders ONLY on the last page if needed */}
+                          {pageIdx === pages.length - 1 && Array.from({ length: Math.max(0, pageSize - pageClasses.length) }).map((_, i) => (
+                            <div key={`empty-${i}`} className="border border-dashed border-slate-100 rounded-lg flex items-center justify-center opacity-20">
+                              <QrCode size={20} className="text-slate-300" />
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <div className="absolute bottom-4 right-8 text-[7px] font-black text-slate-200 uppercase tracking-widest">
+                          Página {pageIdx + 1} de {pages.length}
+                        </div>
+                      </div>
+                    ));
+                  })()}
                 </div>
                 
-                <p className="mt-6 text-sm text-text-muted font-medium max-w-md text-center">
-                  * La vista previa es una representación a escala. Los QRs se generarán con sus enlaces reales al imprimir.
+                <p className="text-sm text-text-muted font-medium max-w-md text-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                  <span className="text-primary font-bold">Tip:</span> Los QRs en la vista previa son 100% funcionales. Puedes probarlos con tu celular ahora mismo.
                 </p>
               </div>
             </motion.div>
